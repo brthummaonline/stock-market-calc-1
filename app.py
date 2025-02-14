@@ -12,6 +12,7 @@ st.set_page_config(page_title="Stock Market Calculator", page_icon="📈", layou
 
 # Sidebar for navigation
 st.sidebar.title("Stock Market Calculator")
+st.sidebar.markdown("---")	
 calculator_type = st.sidebar.selectbox(
     "Choose a Calculator", ["Position Sizing Calculator", "Market Range Calculator"]
 )
