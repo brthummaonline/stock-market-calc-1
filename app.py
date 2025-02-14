@@ -150,4 +150,4 @@ elif calculator_type == "Market Range Calculator":
 
 # Footer
 st.sidebar.markdown("---")
-st.sidebar.markdown("Created with ❤️ by [Your Name]")
+st.sidebar.markdown("Created with ❤️ by BT")
