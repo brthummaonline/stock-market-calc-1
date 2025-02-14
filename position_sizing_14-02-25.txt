@@ -1,8 +1,0 @@
-Position Sizing Calculator Results
----------------------------------
-Account Size: 10000.00
-Risk per Trade: 1.0%
-Entry Price: 50.00
-Stop Loss Price: 45.00
-Risk Amount: 100.00
-Number of Shares: 20
