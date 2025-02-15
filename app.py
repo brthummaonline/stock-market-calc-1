@@ -2,8 +2,13 @@ import streamlit as st
 import math
 import pandas as pd
 from datetime import datetime
+from scipy.stats import norm
 
 timestamp = datetime.now().strftime("%d-%m-%y")
+
+# Helper function to format numbers
+def format_number(value):
+    return f"{int(value)}" if value == int(value) else f"{value:.2f}"
 
 st.set_page_config(page_title="Stock Market Calculator", page_icon="📈", layout="centered")
 
@@ -14,7 +19,7 @@ st.set_page_config(page_title="Stock Market Calculator", page_icon="📈", layou
 st.sidebar.title("Stock Market Calculator")
 st.sidebar.markdown("---")	
 calculator_type = st.sidebar.selectbox(
-    "Choose a Calculator", ["Position Sizing Calculator", "Market Range Calculator"]
+    "Choose a Calculator", ["Position Sizing Calculator", "Market Range Calculator","Options Probability Calculator"]
 )
 
 
@@ -147,6 +152,99 @@ elif calculator_type == "Market Range Calculator":
         # Save to file
         # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"market_range_{timestamp}.txt"
+        save_to_file(filename, output)
+# Options Strike Level Expiry Probability Calculator
+elif calculator_type == "Options Probability Calculator":
+    st.header("Options Strike Level Expiry Probability Calculator")
+    
+    # Input fields
+    current_stock_price = st.number_input("Current Stock Price ($)", min_value=0.01, value=25000.0, step=10.0)
+    call_implied_vol = st.number_input("Call Implied Volatility (%)", min_value=0.01, value=16.22, step=0.01)
+    put_implied_vol = st.number_input("Put Implied Volatility (%)", min_value=0.01, value=20.54, step=0.01)
+    days_to_expiration = st.number_input("Days to Expiration", min_value=1, value=2, step=1)
+    call_target_price = st.number_input("Call Target Price ($)", min_value=0.01, value=25200.0, step=10.0)
+    put_target_price = st.number_input("Put Target Price ($)", min_value=0.01, value=24800.0, step=10.0)
+    
+    # Calculate probabilities
+    if st.button("Calculate Probabilities"):
+        # Convert implied volatilities to decimals
+        call_vol = call_implied_vol / 100
+        put_vol = put_implied_vol / 100
+        
+        # Calculate call probability
+        call_distance = call_target_price - current_stock_price
+        call_d1 = (math.log(current_stock_price / call_target_price) + (0.5 * call_vol**2 * days_to_expiration / 365))
+        call_d1 /= (call_vol * math.sqrt(days_to_expiration / 365))
+        call_prob = norm.cdf(call_d1)
+        
+        # Calculate put probability
+        put_distance = current_stock_price - put_target_price
+        put_d1 = (math.log(current_stock_price / put_target_price) - (0.5 * put_vol**2 * days_to_expiration / 365))
+        put_d1 /= (put_vol * math.sqrt(days_to_expiration / 365))
+        put_prob = norm.cdf(-put_d1)
+        
+        # # Calculate probability of expiring in range
+        # range_prob = norm.cdf(call_d1) - norm.cdf(put_d1)  # Corrected formula
+        
+        # # Ensure non-negative probability
+        # range_prob = max(range_prob, 0)  # Prevent negative probabilities
+        
+        # Prepare output for tabular display
+        call_data = {
+            "Target": ["Call"],
+            "Strike Price": [f"${int(call_target_price)}"],  # Display as integer
+            "Winning Probability": [f"{call_prob * 100:.2f}%"],
+            "Close Above Target": [f"{format_number(call_distance)}"],
+        }
+        put_data = {
+            "Target": ["Put"],
+            "Strike Price": [f"${int(put_target_price)}"],  # Display as integer
+            "Winning Probability": [f"{put_prob * 100:.2f}%"],
+            "Close Below Target": [f"{format_number(put_distance)}"],
+        }
+        # range_data = {
+        #     "Probability of Expiring in Range": [f"{range_prob * 100:.2f}%"],
+        #     "Lower Level": [f"${int(put_target_price)}"],  # Display as integer
+        #     "Upper Level": [f"${int(call_target_price)}"],  # Display as integer
+        # }
+        
+        call_df = pd.DataFrame(call_data)
+        put_df = pd.DataFrame(put_data)
+        # range_df = pd.DataFrame(range_data)
+        
+        # Display results in tables
+        st.subheader("Call Probabilities:")
+        st.table(call_df)
+        
+        st.subheader("Put Probabilities:")
+        st.table(put_df)
+        
+        # st.subheader("Probability of Expiring in Range:")
+        # st.table(range_df)
+        
+        # Prepare output for saving to file
+        output = (
+            f"Options Strike Level Expiry Probability Calculator Results\n"
+            f"--------------------------------------------------------\n"
+            f"Current Stock Price: ${format_number(current_stock_price)}\n"
+            f"Call Implied Volatility: {call_implied_vol}%\n"
+            f"Put Implied Volatility: {put_implied_vol}%\n"
+            f"Days to Expiration: {days_to_expiration}\n\n"
+            f"Call Probabilities:\n"
+            f"  Strike Price: ${int(call_target_price)}\n"
+            f"  Winning Probability: {call_prob * 100:.2f}%\n"
+            f"  Close Above Target: {format_number(call_distance)}\n\n"
+            f"Put Probabilities:\n"
+            f"  Strike Price: ${int(put_target_price)}\n"
+            f"  Winning Probability: {put_prob * 100:.2f}%\n"
+            f"  Close Below Target: {format_number(put_distance)}\n\n"
+            # f"Probability of Expiring in Range: {range_prob * 100:.2f}%\n"
+            # f"  Lower Level: ${int(put_target_price)}\n"
+            # f"  Upper Level: ${int(call_target_price)}\n"
+        )
+        
+        # Save to file
+        filename = f"options_probability_{timestamp}.txt"
         save_to_file(filename, output)
 
 # Footer

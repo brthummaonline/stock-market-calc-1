@@ -1,0 +1,20 @@
+Options Strike Level Expiry Probability Calculator Results
+--------------------------------------------------------
+Current Stock Price: $25000
+Call Implied Volatility: 16.22%
+Put Implied Volatility: 20.54%
+Days to Expiration: 2
+
+Call Probabilities:
+  Strike Price: $25200
+  Winning Probability: 25.54%
+  Close Above Target: 200
+
+Put Probabilities:
+  Strike Price: $24800
+  Winning Probability: 30.13%
+  Close Below Target: 200
+
+Probability of Expiring in Range: 0.00%
+  Lower Level: $24800
+  Upper Level: $25200
